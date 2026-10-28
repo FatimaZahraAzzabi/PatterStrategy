@@ -1,101 +1,133 @@
 
-# Strategy Design Pattern
+# TP : Le pattern Strategy en Java
 
-## Overview
+## 1. Présentation
 
-The Strategy Design Pattern is a behavioral design pattern that defines a family of algorithms, encapsulates each one, and makes them interchangeable. It allows an algorithm to be selected at runtime without modifying the client code.
+Le pattern Strategy est un patron de conception comportemental qui permet de définir une famille d'algorithmes, d'encapsuler chaque algorithme dans une classe distincte et de les rendre interchangeables.
 
-## Structure
+Il permet de modifier le comportement d'un programme sans changer le code de la classe qui utilise ces algorithmes.
 
-The Strategy Pattern consists of three main components:
+## 2. Objectifs du TP
 
-- **Strategy:** Defines a common interface for all supported algorithms.
-- **Concrete Strategies:** Implement different algorithms following the Strategy interface.
-- **Context:** Maintains a reference to a Strategy object and delegates the execution of the algorithm to it.
+- Comprendre le fonctionnement du pattern Strategy.
+- Appliquer les principes de la programmation orientée objet.
+- Réduire le couplage entre les classes.
+- Remplacer les structures conditionnelles complexes par des stratégies interchangeables.
+- Faciliter l'évolution et la maintenance du code.
 
-## How It Works
+## 3. Structure du pattern
 
-1. Define a common interface for the different algorithms.
-2. Implement each algorithm in a separate class.
-3. Inject the desired strategy into the context.
-4. Execute the selected algorithm through the common interface.
-5. Change the strategy at runtime when needed.
+Le pattern Strategy repose sur trois composants principaux :
 
-## Java Example
+- **Strategy :** une interface qui définit une méthode commune aux différentes stratégies.
+- **ConcreteStrategy :** des classes qui implémentent l'interface et définissent des algorithmes spécifiques.
+- **Context :** une classe qui utilise une stratégie sans dépendre directement de son implémentation.
+
+## 4. Exemple d'application en Java
+
+L'exemple suivant illustre l'utilisation du pattern Strategy pour gérer différents modes de paiement.
+
+### 4.1. Interface PaymentStrategy
+
+Cette interface définit la méthode commune à toutes les stratégies de paiement.
 
 ```java
-// Strategy interface
-interface PaymentStrategy {
-    void pay(double amount);
+public interface PaymentStrategy {
+    void payer(double montant);
 }
+```
 
-// Concrete strategy
-class CreditCardPayment implements PaymentStrategy {
-    public void pay(double amount) {
-        System.out.println("Paid by credit card: " + amount);
-    }
-}
+### 4.2. Stratégie de paiement par carte bancaire
 
-// Concrete strategy
-class PayPalPayment implements PaymentStrategy {
-    public void pay(double amount) {
-        System.out.println("Paid by PayPal: " + amount);
-    }
-}
-
-// Context
-class PaymentContext {
-    private PaymentStrategy strategy;
-
-    public PaymentContext(PaymentStrategy strategy) {
-        this.strategy = strategy;
-    }
-
-    public void executePayment(double amount) {
-        strategy.pay(amount);
+```java
+public class PaiementCarte implements PaymentStrategy {
+    @Override
+    public void payer(double montant) {
+        System.out.println(
+            "Paiement par carte bancaire : " + montant + " DH"
+        );
     }
 }
 ```
 
-### Usage
+### 4.3. Stratégie de paiement par PayPal
+
+```java
+public class PaiementPayPal implements PaymentStrategy {
+    @Override
+    public void payer(double montant) {
+        System.out.println(
+            "Paiement par PayPal : " + montant + " DH"
+        );
+    }
+}
+```
+
+### 4.4. Classe de contexte
+
+La classe `PaiementContext` utilise une stratégie de paiement définie par le programme.
+
+```java
+public class PaiementContext {
+    private PaymentStrategy strategie;
+
+    public PaiementContext(PaymentStrategy strategie) {
+        this.strategie = strategie;
+    }
+
+    public void effectuerPaiement(double montant) {
+        strategie.payer(montant);
+    }
+
+    public void setStrategie(PaymentStrategy strategie) {
+        this.strategie = strategie;
+    }
+}
+```
+
+### 4.5. Classe principale
+
+La classe `Main` permet de tester les différentes stratégies de paiement.
 
 ```java
 public class Main {
     public static void main(String[] args) {
-        PaymentContext context =
-            new PaymentContext(new CreditCardPayment());
+        PaiementContext contexte =
+            new PaiementContext(new PaiementCarte());
 
-        context.executePayment(100.0);
+        contexte.effectuerPaiement(500);
 
-        context = new PaymentContext(new PayPalPayment());
-        context.executePayment(200.0);
+        contexte.setStrategie(new PaiementPayPal());
+        contexte.effectuerPaiement(250);
     }
 }
 ```
 
-## Advantages
+### Résultat attendu
 
-- Promotes the Open/Closed Principle.
-- Reduces conditional statements.
-- Improves code reusability and maintainability.
-- Allows algorithms to be changed at runtime.
-- Supports loose coupling between the context and algorithms.
+```text
+Paiement par carte bancaire : 500.0 DH
+Paiement par PayPal : 250.0 DH
+```
 
-## Disadvantages
+## 5. Explication du fonctionnement
 
-- Increases the number of classes in the application.
-- Requires clients to select the appropriate strategy.
+1. L'interface `PaymentStrategy` définit la méthode `payer()`.
+2. Les classes `PaiementCarte` et `PaiementPayPal` implémentent cette interface.
+3. La classe `PaiementContext` utilise une référence de type `PaymentStrategy`.
+4. La méthode `setStrategie()` permet de changer de mode de paiement à l'exécution.
+5. La classe `Main` teste les différentes stratégies sans modifier la classe de contexte.
 
-## Use Cases
+## 6. Avantages
 
-The Strategy Pattern is useful when:
+- Réduction du couplage entre les classes.
+- Amélioration de la lisibilité du code.
+- Facilité d'ajout de nouvelles stratégies.
+- Respect du principe Open/Closed : le comportement peut être étendu sans modifier le code existant du contexte.
+- Possibilité de changer d'algorithme à l'exécution.
 
-- Multiple algorithms can solve the same problem.
-- Different behaviors must be selected dynamically.
-- Complex conditional logic should be replaced with separate implementations.
-- An application needs flexible and extensible business rules.
+## 7. Conclusion
 
-## Conclusion
+Ce TP permet de comprendre comment le pattern Strategy rend une application plus flexible en séparant les différents comportements dans des classes indépendantes.
 
-The Strategy Design Pattern promotes flexibility by encapsulating interchangeable algorithms behind a common interface. It is particularly useful in Java applications where behaviors may vary depending on business requirements.
-
+Ce patron est particulièrement utile lorsque plusieurs algorithmes peuvent être utilisés pour réaliser une même opération et que le choix de l'algorithme doit pouvoir évoluer dynamiquement.
